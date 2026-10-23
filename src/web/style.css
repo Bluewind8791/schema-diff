@@ -15,7 +15,7 @@
   --ln-mod: oklch(0.3 0.05 75); --ln-from: oklch(0.29 0.05 250); --ln-to: oklch(0.29 0.05 30);
   --hatch: repeating-linear-gradient(135deg, #1a1c1f 0 5px, #232529 5px 6px);
   --err-bg: oklch(0.29 0.05 25); --err-bd: oklch(0.38 0.08 25); --err-fg: oklch(0.85 0.1 25); --err-sub: oklch(0.82 0.06 25);
-  --overlay: rgba(8, 9, 10, .6);
+  --overlay: rgba(8, 9, 10, .6); --copy-bg: #24272b;
 }
 :root[data-theme="light"] {
   --bg: #f7f7f5; --fg: #1d1f22; --line: #e4e4e0; --panel: #fff; --card: #fafaf8; --drawer: #fff;
@@ -29,7 +29,7 @@
   --ln-mod: oklch(0.965 0.045 85); --ln-from: oklch(0.96 0.03 250); --ln-to: oklch(0.96 0.03 30);
   --hatch: repeating-linear-gradient(135deg, #f6f6f3 0 5px, #eaeae6 5px 6px);
   --err-bg: oklch(0.96 0.03 25); --err-bd: oklch(0.85 0.08 25); --err-fg: oklch(0.47 0.15 25); --err-sub: oklch(0.45 0.08 25);
-  --overlay: rgba(20, 20, 20, .35);
+  --overlay: rgba(20, 20, 20, .35); --copy-bg: #fafaf8;
 }
 
 * { box-sizing: border-box; }
@@ -58,6 +58,9 @@ input:focus { outline: none; border-color: var(--sub) !important; }
 .btn { height: 32px; padding: 0 11px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--btn); font-size: 13px; cursor: pointer; }
 .btn.primary { border: none; padding: 0 14px; background: var(--prim-bg); color: var(--prim-fg); font-weight: 600; }
 .btn:disabled { opacity: .45; cursor: default; }
+/* 다크/라이트 전환: 반쯤 채운 원 */
+.btn.icon { width: 32px; padding: 0; display: flex; align-items: center; justify-content: center; }
+.half { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--fg); background: linear-gradient(90deg, var(--fg) 50%, transparent 50%); }
 
 /* 타입 탭 + 필터 */
 .typebar { height: 46px; flex-shrink: 0; display: flex; align-items: stretch; justify-content: space-between; padding: 0 18px; border-bottom: 1px solid var(--line); background: var(--panel); }
@@ -115,7 +118,7 @@ input:focus { outline: none; border-color: var(--sub) !important; }
 .tab.act { background: var(--pill); color: var(--fg); }
 .ddl { padding: 6px 0; }
 .ddl-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px minmax(0, 1fr); font: 400 12.5px/22px var(--mono); }
-.ddl-row .n { text-align: right; padding-right: 10px; color: var(--lnum); }
+.ddl-row .n { text-align: right; padding-right: 10px; color: var(--lnum); user-select: none; }
 .ddl-row .n.r { border-left: 1px solid var(--line); }
 .ddl-row .t { white-space: pre-wrap; word-break: break-all; padding: 0 12px; }
 .bg-mod { background: var(--ln-mod); }
@@ -128,9 +131,18 @@ input:focus { outline: none; border-color: var(--sub) !important; }
 .attr-row > .l { text-align: right; }
 .attr-row.info { color: var(--mute); }
 .k.mod { color: var(--mod-fg); } .k.from { color: var(--from-fg); } .k.to { color: var(--to-fg); } .k.same, .k.info { color: var(--mute); }
+/* 동기화 SQL 위쪽 줄: 스크립트 설명 + 복사 버튼. 스크롤해도 위에 붙어 있다 */
+.sql-bar { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 18px; border-bottom: 1px solid var(--line); background: var(--panel); font-size: 12px; color: var(--note); }
+.btn.copy { height: 30px; display: flex; align-items: center; gap: 8px; background: var(--copy-bg); color: var(--fg); font-size: 12px; font-weight: 500; }
+.btn.copy.done { color: var(--ok); }
+/* 복사 아이콘: 겹친 사각형 두 개 */
+.btn.copy .ico { position: relative; width: 14px; height: 14px; }
+.btn.copy .ico::before, .btn.copy .ico::after { content: ''; position: absolute; width: 10px; height: 10px; border: 1.5px solid currentColor; border-radius: 2px; }
+.btn.copy .ico::before { left: 0; top: 0; }
+.btn.copy .ico::after { left: 4px; top: 4px; background: var(--copy-bg); }
 .sql { padding: 10px 0; }
 .sql-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); font: 400 12.5px/22px var(--mono); }
-.sql-row .n { text-align: right; padding-right: 12px; color: var(--lnum); }
+.sql-row .n { text-align: right; padding-right: 12px; color: var(--lnum); user-select: none; }
 .sql-row .t { white-space: pre-wrap; word-break: break-all; }
 .sql-row .t.c { color: var(--note); }
 

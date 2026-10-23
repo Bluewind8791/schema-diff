@@ -23,6 +23,7 @@ const S = {
   type: 'table', sel: null, tab: 'ddl', q: '', f: { mod: true, from: true, to: true, same: true },
   diff: {},
   listH: 0, // 끌어서 정한 목록 높이(px). 0 이면 CSS 기본값
+  copied: false, // 동기화 SQL 을 막 복사했으면 잠시 「복사됨」 표시
 };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -71,7 +72,7 @@ function header() {
     <div class="brand"><img src="favicon.svg" alt="">SchemaDiff</div>
     <div class="conns">${conn('from')}<span class="arrow">→</span>${conn('to')}</div>
     <div class="btns">
-      <button class="btn" data-act="theme">${document.documentElement.dataset.theme === 'dark' ? '라이트' : '다크'}</button>
+      <button class="btn icon" data-act="theme" title="${document.documentElement.dataset.theme === 'dark' ? '라이트' : '다크'} 모드로 전환"><span class="half"></span></button>
       <button class="btn" data-act="history">이력</button>
       <button class="btn" data-act="export" ${S.run ? '' : 'disabled'}>내보내기</button>
       <button class="btn primary" data-act="compare" ${ready ? '' : 'disabled'}>비교 실행</button>
@@ -152,12 +153,16 @@ function detail() {
       }).join('') + '</div>';
     }
   } else {
-    body = '<div class="sql">' + o.sql.map((t, i) =>
+    const to = S.run.to.name || S.run.to.svc;
+    body = `<div class="sql-bar"><span>TO(${esc(to)})를 FROM에 맞추는 스크립트 · ${o.sql.length}줄</span>
+        <button class="btn copy ${S.copied ? 'done' : ''}" data-act="copy" title="클립보드에 복사">${S.copied ? '✓ 복사됨' : '<span class="ico"></span>복사'}</button></div>`
+      + '<div class="sql">' + o.sql.map((t, i) =>
       `<div class="sql-row"><span class="n">${i + 1}</span><span class="t ${t.startsWith('--') ? 'c' : ''}">${esc(t)}</span></div>`).join('') + '</div>';
   }
+  // 오른쪽 끝부터 이름 · 상태 · 변경 요약
   return `<div class="detail"><div class="detail-head">
-      <div class="title"><span class="name">${esc(o.name)}</span><span class="badge ${o.st}">${LBL[o.st]}</span><span class="note" title="${esc(o.note)}">${esc(o.note)}</span></div>
-      <div class="tabs">${tabs}</div></div>
+      <div class="tabs">${tabs}</div>
+      <div class="title"><span class="note" title="${esc(o.note)}">${esc(o.note)}</span><span class="badge ${o.st}">${LBL[o.st]}</span><span class="name">${esc(o.name)}</span></div></div>
     <div class="scroll" id="detail-scroll">${body}</div></div>`;
 }
 
@@ -338,6 +343,7 @@ async function exportSql() {
   } catch (e) { fail(e); }
 }
 
+let copyTimer = 0;
 const ACT = {
   theme: toggleTheme,
   open: el => openDrawer(el.dataset.side),
@@ -373,6 +379,13 @@ const ACT = {
   chip: el => { S.f[el.dataset.k] = !S.f[el.dataset.k]; render(); },
   sel: el => { S.sel = Number(el.dataset.i); render(); },
   tab: el => { S.tab = el.dataset.id; render(); },
+  copy: async () => {
+    try { await navigator.clipboard.writeText(current().sql.join('\n')); } catch (e) { return fail(e); }
+    S.copied = true;
+    render();
+    clearTimeout(copyTimer);
+    copyTimer = setTimeout(() => { S.copied = false; render(); }, 1600);
+  },
   toast: () => { S.toast = ''; render(); },
 };
 
