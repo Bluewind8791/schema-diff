@@ -20,7 +20,7 @@ const S = {
   form: { from: blank(), to: blank() },
   applied: { from: null, to: null },
   run: null, busy: '', toast: '', hist: null,
-  type: 'table', sel: null, tab: 'ddl', q: '', f: { mod: true, from: true, to: true, same: true },
+  type: 'table', sel: null, tab: 'ddl', q: '', f: { mod: true, from: true, to: true, same: false },
   diff: {},
   listH: 0, // 끌어서 정한 목록 높이(px). 0 이면 CSS 기본값
   copied: false, // 동기화 SQL 을 막 복사했으면 잠시 「복사됨」 표시

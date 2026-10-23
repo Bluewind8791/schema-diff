@@ -183,8 +183,12 @@ final class OracleAdapter implements Adapter {
         v.spec.put("columns", cols);
         v.spec.put("comment", cmt);
         v.src = text.replaceAll("\\s+", " ").trim();
-        v.attrs.put("STATUS", obj == null ? "" : obj[0]);
-        for (Col col : cols) v.attrs.put(col.name, colAttr(col));
+        // 상태와 컬럼 정의는 바탕 테이블에 따라 정해지므로 참고로만 보이고, 차이는 원문과 주석으로만 판정한다
+        v.info.put("STATUS", obj == null ? "" : obj[0]);
+        for (Col col : cols) {
+            v.info.put(col.name, col.type + (col.nn ? "  NOT NULL" : ""));
+            if (col.cmt != null) v.attrs.put(col.name + " (주석)", col.cmt);
+        }
         if (cmt != null) v.attrs.put("(뷰 주석)", cmt);
         if (obj != null) v.info.put("LAST_DDL", obj[1]);
         v.summary = (obj == null ? "" : obj[0] + " · " + obj[1].substring(0, 10));
@@ -382,7 +386,7 @@ final class OracleAdapter implements Adapter {
             }
             x.src = normLines(spec) + (body == null ? "" : "\n/\n" + normLines(body));
             String status = (st == null ? "?" : st[0]) + (body == null ? "" : " / " + (bst == null ? "?" : bst[0]));
-            x.attrs.put("STATUS", status);
+            x.info.put("STATUS", status); // 컴파일 상태는 차이로 세지 않는다
             if ("TRIGGER".equals(otype) && trg.containsKey(name)) {
                 x.attrs.put("TABLE", trg.get(name)[0]);
                 x.attrs.put("ENABLED", trg.get(name)[1]);
@@ -540,29 +544,18 @@ final class OracleAdapter implements Adapter {
         if (!Objects.equals(fc, tc)) out.add(commentSql("COMMENT ON TABLE " + n, fc, tc));
         Map<String, Col> tcols = new HashMap<>();
         for (Col col : (List<Col>) t.spec.get("columns")) tcols.put(col.name, col);
-        boolean colDiff = false;
         for (Col a : (List<Col>) f.spec.get("columns")) {
             Col b = tcols.get(a.name);
-            if (b == null || !a.type.equals(b.type) || a.nn != b.nn) colDiff = true;
             if (b != null && !Objects.equals(a.cmt, b.cmt))
                 out.add(commentSql("COMMENT ON COLUMN " + n + "." + id(a.name), a.cmt, b.cmt));
-        }
-        if (colDiff || !Objects.equals(f.attrs.get("STATUS"), t.attrs.get("STATUS"))) {
-            out.add("-- 원문은 같고 컬럼 정의나 상태가 다름. 다시 컴파일하면 참조 테이블 기준으로 갱신된다");
-            out.add("ALTER VIEW " + n + " COMPILE;");
         }
         return out;
     }
 
     private static List<String> syncCode(DbObject f, DbObject t) {
         List<String> out = new ArrayList<>();
-        String otype = (String) f.spec.get("otype"), n = id(f.name);
+        String n = id(f.name);
         if (!Objects.equals(f.src, t.src) || !Objects.equals(f.attrs.get("TABLE"), t.attrs.get("TABLE"))) return f.ddl;
-        String fs = f.attrs.get("STATUS"), ts = t.attrs.get("STATUS");
-        if (!Objects.equals(fs, ts)) {
-            if (ts.contains("INVALID")) out.add("ALTER " + otype + " " + n + " COMPILE;");
-            else out.add("-- FROM 쪽이 INVALID. TO 는 그대로 둠");
-        }
         String fe = f.attrs.get("ENABLED"), te = t.attrs.get("ENABLED");
         if (fe != null && !fe.equals(te)) out.add("ALTER TRIGGER " + n + ("DISABLED".equals(fe) ? " DISABLE;" : " ENABLE;"));
         return out;
