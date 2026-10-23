@@ -1,4 +1,4 @@
-# SchemaDiff
+# <img src="src/web/favicon.svg" width="32" height="32" alt=""> SchemaDiff
 
 로컬에서 실행하는 DB 스키마 비교 도구. FROM(기준)·TO(대상) DB 에 직접 접속해 메타데이터를 비교하고, TO 를 FROM 에 맞추는 동기화 SQL 을 만든다. 현재 Oracle 만 지원.
 
@@ -6,7 +6,8 @@
 
 - 필요한 것: JDK/JRE 11 이상 (`java` 가 PATH 에 있어야 함)
 - `SchemaDiff.bat` 더블클릭 → 브라우저에 `http://127.0.0.1:8765/` 가 열린다. 콘솔 창을 닫으면 종료.
-- 다른 PC 로 옮길 때는 `schemadiff.jar` 와 `SchemaDiff.bat` 두 파일만 복사하면 된다.
+- 다른 PC 로 옮길 때는 `schemadiff.jar` 와 `SchemaDiff.bat` 두 파일만 복사하면 된다. 아이콘 바로가기를 쓰려면 `schemadiff.ico`·`make-shortcut.bat` 도 복사한다.
+- 아이콘 바로가기: `make-shortcut.bat` 을 실행하면 같은 폴더에 `SchemaDiff.lnk` 가 생긴다. 바탕화면이나 작업 표시줄로 옮겨 쓴다(`.bat` 파일 자체에는 아이콘을 붙일 수 없다).
 
 ## 빌드
 

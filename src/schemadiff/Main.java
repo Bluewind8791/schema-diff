@@ -289,7 +289,7 @@ public final class Main {
                 return;
             }
             String type = path.endsWith(".html") ? "text/html; charset=utf-8" : path.endsWith(".js") ? "text/javascript; charset=utf-8"
-                    : path.endsWith(".css") ? "text/css; charset=utf-8" : "application/octet-stream";
+                    : path.endsWith(".css") ? "text/css; charset=utf-8" : path.endsWith(".svg") ? "image/svg+xml" : "application/octet-stream";
             send(x, 200, type, in.readAllBytes());
         }
     }

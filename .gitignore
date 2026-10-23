@@ -1,3 +1,4 @@
 build/
 schemadiff.jar
 data/
+*.lnk

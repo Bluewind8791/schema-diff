@@ -67,7 +67,7 @@ function header() {
       <span class="lbl ${side}">${side.toUpperCase()}</span><span>${esc(dbmsLabel(a[side]))}</span>
       <span class="sub">${esc(label(side))}</span><span class="dot ${a[side] ? 'ok' : ''}"></span></div>`;
   return `<header class="top">
-    <div class="brand"><i></i>SchemaDiff</div>
+    <div class="brand"><img src="favicon.svg" alt="">SchemaDiff</div>
     <div class="conns">${conn('from')}<span class="arrow">→</span>${conn('to')}</div>
     <div class="btns">
       <button class="btn" data-act="theme">${document.documentElement.dataset.theme === 'dark' ? '라이트' : '다크'}</button>
