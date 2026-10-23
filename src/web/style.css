@@ -1,4 +1,11 @@
-/* 디자인: Claude Design 「Schema Diff Drafts」 1b(다크·라이트) + 2a(연결 서랍). 외부 폰트 없이 로컬 글꼴로 대체 */
+/* 디자인: Claude Design 「Schema Diff Drafts」 1b(다크·라이트) + 2a(연결 서랍). 글꼴은 디자인과 같은 것을 함께 배포한다(OFL-*.txt) */
+@font-face { font-family: 'IBM Plex Sans KR'; font-weight: 400; src: url(IBMPlexSansKR-Regular.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans KR'; font-weight: 500; src: url(IBMPlexSansKR-Medium.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans KR'; font-weight: 600; src: url(IBMPlexSansKR-SemiBold.woff2) format('woff2'); }
+/* JetBrains Mono 는 라틴 글자만 있다. 한글은 다음 글꼴로 넘어간다 */
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400; src: url(JetBrainsMono-400.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 500; src: url(JetBrainsMono-500.woff2) format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 600; src: url(JetBrainsMono-600.woff2) format('woff2'); }
 :root {
   --sans: 'IBM Plex Sans KR', 'Malgun Gothic', sans-serif;
   --mono: 'JetBrains Mono', 'D2Coding', Consolas, monospace;
