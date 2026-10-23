@@ -100,14 +100,8 @@ function typebar() {
   const os = objsOfType();
   const chips = ['mod', 'from', 'to', 'same'].map(k =>
     `<span class="chip ${k} ${S.f[k] ? 'on' : ''}" data-act="chip" data-k="${k}">${LBL[k]} ${os.filter(o => o.st === k).length}</span>`).join('');
-  let excl = '';
-  if (S.run) {
-    const ef = S.run.from.excluded || [], et = S.run.to.excluded || [];
-    if (ef.length || et.length)
-      excl = `<span class="excl" title="${esc('백업·임시 패턴(data/settings.json 의 exclude)으로 비교에서 뺀 테이블·시퀀스\nFROM: ' + ef.join(', ') + '\nTO: ' + et.join(', '))}">제외 ${ef.length}/${et.length}</span>`;
-  }
   return `<div class="typebar"><div class="types">${tabs}</div>
-    <div class="filters">${excl}${chips}<input id="q" class="search" value="${esc(S.q)}" placeholder="검색" data-input="q"></div></div>`;
+    <div class="filters">${chips}<input id="q" class="search" value="${esc(S.q)}" placeholder="검색" data-input="q"></div></div>`;
 }
 
 function list() {
