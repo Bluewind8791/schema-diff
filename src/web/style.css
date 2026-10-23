@@ -16,6 +16,7 @@
   --hatch: repeating-linear-gradient(135deg, #1a1c1f 0 5px, #232529 5px 6px);
   --err-bg: oklch(0.29 0.05 25); --err-bd: oklch(0.38 0.08 25); --err-fg: oklch(0.85 0.1 25); --err-sub: oklch(0.82 0.06 25);
   --overlay: rgba(8, 9, 10, .6); --copy-bg: #24272b;
+  --fold-fg: #a7aab0; --fold-on-fg: #16181a; --fold-row-bg: #16181a; --fold-row-bd: #2c2f33;
 }
 :root[data-theme="light"] {
   --bg: #f7f7f5; --fg: #1d1f22; --line: #e4e4e0; --panel: #fff; --card: #fafaf8; --drawer: #fff;
@@ -30,6 +31,7 @@
   --hatch: repeating-linear-gradient(135deg, #f6f6f3 0 5px, #eaeae6 5px 6px);
   --err-bg: oklch(0.96 0.03 25); --err-bd: oklch(0.85 0.08 25); --err-fg: oklch(0.47 0.15 25); --err-sub: oklch(0.45 0.08 25);
   --overlay: rgba(20, 20, 20, .35); --copy-bg: #fafaf8;
+  --fold-fg: #55585d; --fold-on-fg: #fff; --fold-row-bg: #f3f3f0; --fold-row-bd: #dcdcd7;
 }
 
 * { box-sizing: border-box; }
@@ -115,6 +117,13 @@ input:focus { outline: none; border-color: var(--sub) !important; }
 .tabs { display: flex; gap: 4px; padding: 3px; border-radius: 7px; background: var(--bg); border: 1px solid var(--line); flex-shrink: 0; }
 .tab { padding: 4px 12px; border-radius: 5px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--note); }
 .tab.act { background: var(--pill); color: var(--fg); }
+.head-l { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.btn.fold { height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 10px; color: var(--fold-fg); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.btn.fold.on { background: var(--fg); border-color: var(--fg); color: var(--fold-on-fg); }
+.btn.fold .ico { display: flex; flex-direction: column; gap: 3px; width: 14px; }
+.btn.fold .ico span { height: 1.5px; background: currentColor; }
+.btn.fold .ico span:nth-child(2) { height: 0; background: none; border-top: 1.5px dotted currentColor; }
+.fold-row { display: flex; align-items: center; justify-content: center; height: 26px; margin: 3px 0; font: 400 12px var(--mono); cursor: pointer; color: var(--note); background: var(--fold-row-bg); border-top: 1px dashed var(--fold-row-bd); border-bottom: 1px dashed var(--fold-row-bd); }
 .ddl { padding: 6px 0; }
 .ddl-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px minmax(0, 1fr); font: 400 12.5px/22px var(--mono); }
 .ddl-row .n { text-align: right; padding-right: 10px; color: var(--lnum); user-select: none; }

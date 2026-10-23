@@ -24,6 +24,7 @@ const S = {
   diff: {},
   listH: 0, // 끌어서 정한 목록 높이(px). 0 이면 CSS 기본값
   copied: false, // 동기화 SQL 을 막 복사했으면 잠시 「복사됨」 표시
+  fold: false, // 속성·DDL 비교에서 동일한 행을 접고 차이만 보기
 };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -129,7 +130,9 @@ function detail() {
   const tabs = tabDefs.map(([id, label]) => `<div class="tab ${S.tab === id ? 'act' : ''}" data-act="tab" data-id="${id}">${label}</div>`).join('');
   let body = '';
   if (S.tab === 'attr') {
-    body = o.attr.map(([k, l, r, st]) => {
+    // 차이가 하나도 없으면 접지 않고 전부 보인다
+    const diffs = o.attr.filter(a => ['mod', 'from', 'to'].includes(a[3]));
+    body = (S.fold && diffs.length ? diffs : o.attr).map(([k, l, r, st]) => {
       const lb = st === 'mod' ? 'bg-mod' : st === 'from' ? 'bg-from' : st === 'to' ? 'bg-hatch' : '';
       const rb = st === 'mod' ? 'bg-mod' : st === 'to' ? 'bg-to' : st === 'from' ? 'bg-hatch' : '';
       return `<div class="attr-row ${st === 'info' ? 'info' : ''}"><div class="l ${lb}">${esc(l)}</div><div class="k ${st}">${esc(k)}</div><div class="${rb}">${esc(r)}</div></div>`;
@@ -140,7 +143,10 @@ function detail() {
       loadDiff(o);
       body = '<div class="empty">불러오는 중…</div>';
     } else {
-      body = '<div class="ddl">' + rows.map(([k, l, ln, r, rn]) => {
+      body = '<div class="ddl">' + foldDdl(rows).map(row => {
+        if (typeof row === 'number')
+          return `<div class="fold-row" data-act="unfold">⋯ 동일한 ${row}줄 접힘 · 클릭하여 펼치기</div>`;
+        const [k, l, ln, r, rn] = row;
         const lb = k === 'mod' ? 'bg-mod' : k === 'from' ? 'bg-from' : k === 'to' ? 'bg-hatch' : '';
         const rb = k === 'mod' ? 'bg-mod' : k === 'to' ? 'bg-to' : k === 'from' ? 'bg-hatch' : '';
         return `<div class="ddl-row"><span class="n ${lb}">${ln}</span><span class="t ${lb}">${esc(l)}</span><span class="n r ${rb}">${rn}</span><span class="t ${rb}">${esc(r)}</span></div>`;
@@ -153,11 +159,28 @@ function detail() {
       + '<div class="sql">' + o.sql.map((t, i) =>
       `<div class="sql-row"><span class="n">${i + 1}</span><span class="t ${t.startsWith('--') ? 'c' : ''}">${esc(t)}</span></div>`).join('') + '</div>';
   }
+  const fold = S.tab === 'sql' ? '' : `<button class="btn fold ${S.fold ? 'on' : ''}" data-act="fold" title="${S.fold ? '동일한 부분 다시 펼치기' : '동일한 행을 접고 차이만 보기'}">
+      <span class="ico"><span></span><span></span><span></span></span>${S.fold ? '전체 보기' : '차이만 보기'}</button>`;
   // 오른쪽 끝부터 이름 · 상태 · 변경 요약
   return `<div class="detail"><div class="detail-head">
-      <div class="tabs">${tabs}</div>
+      <div class="head-l"><div class="tabs">${tabs}</div>${fold}</div>
       <div class="title"><span class="note" title="${esc(o.note)}">${esc(o.note)}</span><span class="badge ${o.st}">${LBL[o.st]}</span><span class="name">${esc(o.name)}</span></div></div>
     <div class="scroll" id="detail-scroll">${body}</div></div>`;
+}
+
+/** 차이만 보기: 바뀐 줄과 그 앞뒤 한 줄만 남기고, 2줄 이상 이어진 동일한 줄은 접힌 줄 수(number)로 바꾼다. */
+function foldDdl(rows) {
+  if (!S.fold || rows.every(r => r[0] === 'same')) return rows;
+  const keep = i => [i - 1, i, i + 1].some(j => rows[j] && rows[j][0] !== 'same');
+  const out = [];
+  for (let i = 0; i < rows.length;) {
+    if (keep(i)) { out.push(rows[i++]); continue; }
+    let j = i;
+    while (j < rows.length && !keep(j)) j++;
+    out.push(j - i > 1 ? j - i : rows[i]);
+    i = j;
+  }
+  return out;
 }
 
 function drawer() {
@@ -373,6 +396,8 @@ const ACT = {
   chip: el => { S.f[el.dataset.k] = !S.f[el.dataset.k]; render(); },
   sel: el => { S.sel = Number(el.dataset.i); render(); },
   tab: el => { S.tab = el.dataset.id; render(); },
+  fold: () => { S.fold = !S.fold; render(); },
+  unfold: () => { S.fold = false; render(); },
   copy: async () => {
     try { await navigator.clipboard.writeText(current().sql.join('\n')); } catch (e) { return fail(e); }
     S.copied = true;
