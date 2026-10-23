@@ -78,7 +78,7 @@ input:focus { outline: none; border-color: var(--sub) !important; }
 .excl { font-size: 12px; color: var(--mute); white-space: nowrap; cursor: help; }
 
 /* 미러 목록 */
-.list { height: 38vh; min-height: 220px; flex-shrink: 0; display: flex; flex-direction: column; border-bottom: 1px solid var(--line); }
+.list { height: 38vh; min-height: 220px; max-height: calc(100vh - 222px); flex-shrink: 0; display: flex; flex-direction: column; border-bottom: 1px solid var(--line); }
 .grid3 { display: grid; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr); }
 .list-head { font-size: 12px; font-weight: 600; color: var(--mute); border-bottom: 1px solid var(--line); }
 .list-head > div { padding: 8px 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -98,6 +98,11 @@ input:focus { outline: none; border-color: var(--sub) !important; }
 .badge.from { background: var(--from-bg); color: var(--from-fg); }
 .badge.to { background: var(--to-bg); color: var(--to-fg); }
 .badge.same { background: var(--same-bg); color: var(--same-fg); }
+
+/* 목록·상세 경계: 끌어서 목록 높이를 바꾼다 */
+.split { height: 7px; margin: -4px 0 -3px; flex-shrink: 0; position: relative; z-index: 1; cursor: row-resize; }
+.split:hover, .resizing .split { background: var(--sub); opacity: .5; }
+.resizing { cursor: row-resize; user-select: none; }
 
 /* 하단 상세 */
 .detail { flex: 1; min-height: 0; display: flex; flex-direction: column; background: var(--panel); }

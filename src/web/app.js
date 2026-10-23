@@ -22,6 +22,7 @@ const S = {
   run: null, busy: '', toast: '', hist: null,
   type: 'table', sel: null, tab: 'ddl', q: '', f: { mod: true, from: true, to: true, same: true },
   diff: {},
+  listH: 0, // 끌어서 정한 목록 높이(px). 0 이면 CSS 기본값
 };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -123,7 +124,7 @@ function list() {
         <div class="side ${o.toName ? '' : 'none'}"><span>${esc(o.toName)}</span><span>${esc(o.rSum)}</span></div></div>`).join('')
       || '<div class="empty">조건에 맞는 오브젝트가 없습니다</div>';
   }
-  return `<div class="list">${head}<div class="scroll" id="list-scroll">${body}</div></div>`;
+  return `<div class="list"${S.listH ? ` style="height:${S.listH}px"` : ''}>${head}<div class="scroll" id="list-scroll">${body}</div></div>`;
 }
 
 function detail() {
@@ -234,7 +235,7 @@ function render() {
   const ae = document.activeElement, focusId = ae && ae.id, caret = ae && ae.selectionStart;
   const scrolls = {};
   document.querySelectorAll('[id$="-scroll"]').forEach(e => { scrolls[e.id] = e.scrollTop; });
-  document.getElementById('app').innerHTML = header() + typebar() + list() + detail() + drawer() + history()
+  document.getElementById('app').innerHTML = header() + typebar() + list() + '<div class="split" title="끌어서 높이 조절"></div>' + detail() + drawer() + history()
     + (S.busy ? `<div class="busy"><div>${esc(S.busy)}</div></div>` : '')
     + (S.toast ? `<div class="toast" data-act="toast" title="눌러서 닫기">${esc(S.toast)}</div>` : '');
   Object.entries(scrolls).forEach(([id, top]) => { const e = document.getElementById(id); if (e) e.scrollTop = top; });
@@ -396,6 +397,27 @@ document.addEventListener('input', e => {
     if (CONN_FIELDS.includes(field)) Object.assign(fm, { edited: true, test: 'idle', schemas: [] });
   }
   render();
+});
+
+// 목록과 상세 사이 경계를 끌어 목록 높이를 바꾼다. 끄는 동안은 다시 그리지 않고 높이만 바꾼다
+let drag = null;
+document.addEventListener('pointerdown', e => {
+  if (!e.target.classList.contains('split')) return;
+  e.preventDefault();
+  drag = { y: e.clientY, h: document.querySelector('.list').offsetHeight };
+  document.body.classList.add('resizing');
+});
+document.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const list = document.querySelector('.list');
+  // 상세 영역이 최소 120px 은 남도록 한다(위쪽 바 56px + 타입 바 46px)
+  S.listH = Math.round(Math.max(220, Math.min(window.innerHeight - 222, drag.h + e.clientY - drag.y)));
+  list.style.height = S.listH + 'px';
+});
+document.addEventListener('pointerup', () => {
+  if (!drag) return;
+  drag = null;
+  document.body.classList.remove('resizing');
 });
 
 document.addEventListener('keydown', e => {
