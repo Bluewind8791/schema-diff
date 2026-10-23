@@ -1,4 +1,6 @@
 build/
-schemadiff.jar
+SchemaDiff.exe
 data/
 *.lnk
+dist/
+dev-data/

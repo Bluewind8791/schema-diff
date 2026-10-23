@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- build.bat 이 build\schemadiff.jar 를 dist\SchemaDiff.exe 로 감싼다. 받는 PC 에는 Java 11 이상이 있어야 한다.
+     Launch4j 3.14 는 문구를 ISO-8859-1 로 넣어 한글이 깨지므로 messages 는 영어로 쓴다. -->
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <!-- gui: Java 가 없을 때 경고 창을 띄운다(console 형은 콘솔에 한 줄 찍고 바로 닫힌다). 실행 중에는 StatusWindow 가 콘솔을 대신한다 -->
+  <headerType>gui</headerType>
+  <cmdLine>--window</cmdLine>
+  <jar>build\schemadiff.jar</jar>
+  <outfile>dist\SchemaDiff.exe</outfile>
+  <errTitle>SchemaDiff</errTitle>
+  <chdir>.</chdir>
+  <icon>schemadiff.ico</icon>
+  <downloadUrl>https://adoptium.net/</downloadUrl>
+  <jre>
+    <!-- 레지스트리(JavaSoft)에서 11 이상을 먼저 찾고, 없으면 JAVA_HOME·PATH 의 java 를 쓴다(버전 확인은 Boot 가 한다) -->
+    <path>%JAVA_HOME%;%PATH%</path>
+    <bundledJreAsFallback>true</bundledJreAsFallback>
+    <minVersion>11</minVersion>
+    <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
+    <opt>-Dfile.encoding=UTF-8</opt>
+  </jre>
+  <messages>
+    <jreVersionErr>SchemaDiff needs Java 11 or later, but no Java was found.
+Install Java and run SchemaDiff again. The download page opens when you click OK.
+
+Required version:</jreVersionErr>
+  </messages>
+</launch4jConfig>

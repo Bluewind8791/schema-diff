@@ -32,7 +32,8 @@ import java.util.zip.GZIPOutputStream;
 /** 로컬 전용 HTTP 서버. 127.0.0.1 에만 열고, 화면(web/)과 JSON API(/api/)를 제공한다. */
 public final class Main {
 
-    static final int PORT = 8765;
+    // 개발 실행(dev.bat)은 아래 시스템 속성으로 포트·데이터 폴더·화면 파일 위치를 바꿔 평소 쓰는 프로그램과 함께 띄운다
+    static final int PORT = Integer.getInteger("schemadiff.port", 8765);
     static final String URL_BASE = "http://127.0.0.1:" + PORT + "/";
     static final Map<String, Adapter> ADAPTERS = Map.of("oracle", new OracleAdapter());
     /** report.py 의 백업·임시 테이블 패턴. data/settings.json 에서 바꿀 수 있다. */
@@ -42,11 +43,16 @@ public final class Main {
     private static final Map<String, Map<String, Object>> RUNS = new ConcurrentHashMap<>();
     private static final Map<String, String> PW_CACHE = new ConcurrentHashMap<>();
     private static Path data;
+    /** 화면 파일을 jar 대신 읽을 폴더(개발용). null 이면 jar 안의 web/ */
+    private static final String WEB_DIR = System.getProperty("schemadiff.web");
 
     public static void main(String[] args) throws Exception {
-        data = appDir().resolve("data");
+        String dataDir = System.getProperty("schemadiff.data");
+        data = dataDir != null ? Paths.get(dataDir).toAbsolutePath() : appDir().resolve("data");
         Files.createDirectories(data.resolve("history"));
         boolean browser = !List.of(args).contains("--no-browser");
+        // SchemaDiff.exe 는 콘솔 없이 --window 로 띄운다. 콘솔 대신 상태 창을 보이고, 시작 실패는 Boot 가 창으로 알린다
+        boolean window = List.of(args).contains("--window");
         HttpServer s;
         try {
             s = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT), 0);
@@ -55,7 +61,9 @@ public final class Main {
                 System.out.println("SchemaDiff 가 이미 실행 중입니다. 브라우저만 엽니다.");
                 if (browser) openBrowser();
             } else {
-                System.out.println("포트 " + PORT + " 를 다른 프로그램이 쓰고 있습니다.");
+                String msg = "포트 " + PORT + " 를 다른 프로그램이 쓰고 있습니다.";
+                if (window) throw new IllegalStateException(msg);
+                System.out.println(msg);
             }
             return;
         }
@@ -65,6 +73,7 @@ public final class Main {
         System.out.println("SchemaDiff 실행 중: " + URL_BASE);
         System.out.println("이 창을 닫으면 종료됩니다.");
         if (browser) openBrowser();
+        if (window) StatusWindow.show(URL_BASE, Main::openBrowser);
     }
 
     private static Path appDir() throws Exception {
@@ -283,7 +292,9 @@ public final class Main {
             send(x, 404, "text/plain", "not found");
             return;
         }
-        try (InputStream in = Main.class.getResourceAsStream("/web" + path)) {
+        Path file = WEB_DIR == null ? null : Paths.get(WEB_DIR, path.substring(1));
+        try (InputStream in = file == null ? Main.class.getResourceAsStream("/web" + path)
+                : Files.exists(file) ? Files.newInputStream(file) : null) {
             if (in == null) {
                 send(x, 404, "text/plain", "not found");
                 return;
